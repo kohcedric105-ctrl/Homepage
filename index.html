@@ -116,12 +116,12 @@
   .address { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
   .address-box {
     flex: 1 1 260px; min-width: 0;
-    display: flex; align-items: center;
+    display: flex; align-items: center; justify-content: center; text-align: center;
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 999px;
-    padding: 12px 22px;
-    font: 500 17px "JetBrains Mono", monospace;
+    padding: 10px 22px;
+    font: 600 clamp(19px, 2.2vw, 24px) "JetBrains Mono", monospace;
   }
   .address-box code { overflow-wrap: anywhere; }
   .hint { margin-top: 14px; font-size: 15px; color: var(--ink-3); }
@@ -138,13 +138,13 @@
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
   .tile { border-radius: 18px; padding: 18px; color: var(--ink); min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; }
   .tile.wide { grid-column: 1 / -1; min-height: 0; }
-  .tile-green  { background: var(--green); }
+  .tile-status { background: #d9d1c1; transition: background .3s ease, color .3s ease; }
+  .tile-status.is-online  { background: var(--green); }
+  .tile-status.is-offline { background: var(--red); color: #fff; }
   .tile-blue   { background: var(--blue); color: #fff; }
   .tile-yellow { background: var(--yellow); }
   .tile-label { font: 500 13px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
   .tile-value { display: flex; align-items: center; gap: 10px; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; }
-  .tile-value .dot { width: 14px; height: 14px; border: 2px solid var(--ink); }
-  .tile-blue .tile-value .dot { border-color: #fff; }
   .playing { margin-top: 14px; font-size: 15px; color: #d9d2c4; min-height: 1.4em; }
   .sticker {
     position: absolute; top: -18px; right: 22px;
@@ -191,8 +191,23 @@
     border: 1.5px solid var(--line);
     border-radius: 6px;
     padding: 1px 6px;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
   }
+  code.cmd {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 8px 0 14px;
+    font: 500 14px "JetBrains Mono", monospace;
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  code.cmd:last-child { margin-bottom: 0; }
+  code.cmd-lg { font-size: clamp(17px, 1.6vw, 20px); font-weight: 600; padding: 8px 14px; }
 
   /* Rules */
   .rules { list-style: none; margin-top: 32px; display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -273,7 +288,7 @@
       <div>
         <div class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Checking server…</span></div>
         <h1>Come <span class="hl">build</span> something with us.</h1>
-        <p class="sub">A laid-back Minecraft survival world for friends, running on a small homelab in my room. Free to join, no strangers, no pay-to-win.</p>
+        <p class="sub">A super chill Minecraft survival world for friends, running on a small homelab. Free to join, no strangers, no pay-to-win.</p>
 
         <div class="address">
           <div class="address-box"><code id="address">mc.cedrick105.com</code></div>
@@ -286,13 +301,13 @@
         <span class="sticker">Live</span>
         <div class="board-title">Server status</div>
         <div class="tiles">
-          <div class="tile tile-green">
+          <div class="tile tile-status" id="status-tile">
             <div class="tile-label">Status</div>
-            <div class="tile-value"><span class="dot"></span><span id="stat-status">–</span></div>
+            <div class="tile-value"><span id="stat-status">–</span></div>
           </div>
           <div class="tile tile-blue">
             <div class="tile-label">Players</div>
-            <div class="tile-value"><span class="dot"></span><span id="stat-players">–</span></div>
+            <div class="tile-value"><span id="stat-players">–</span></div>
           </div>
           <div class="tile tile-yellow wide">
             <div class="tile-label">Version</div>
@@ -316,8 +331,15 @@
       </div>
       <ol class="steps">
         <li>Open Minecraft <strong>Java Edition</strong> and go to <strong>Multiplayer</strong>.</li>
-        <li>Click <strong>Add Server</strong> and paste <code class="inline js-address">mc.cedrick105.com</code> as the address.</li>
-        <li class="js-login">First time? Type <code class="inline">/register &lt;password&gt; &lt;password&gt;</code>. After that, just <code class="inline">/login &lt;password&gt;</code>.</li>
+        <li>Click <strong>Add Server</strong> and paste this as the address:
+          <code class="cmd cmd-lg js-address">mc.cedrick105.com</code>
+        </li>
+        <li class="js-login">
+          First time? Register with:
+          <code class="cmd">/register &lt;password&gt; &lt;password&gt;</code>
+          After that, log in with:
+          <code class="cmd">/login &lt;password&gt;</code>
+        </li>
       </ol>
     </div>
   </section>
@@ -381,8 +403,8 @@
     // status: "live" (clickable, coloured), "soon" (dashed outline), "private" (coloured, no link)
     services: [
       { name: "Minecraft", desc: "Survival world for friends", url: "", status: "live", mc: true },
-      { name: "Dashboard", desc: "Glance home dashboard",       url: "", status: "soon" },
-      { name: "Media",     desc: "Films and shows",             url: "", status: "soon" }
+      { name: "Immich", desc: "Self-hosted photo management",       url: "", status: "soon" },
+      { name: "JellyFin Media Server",     desc: "Films and shows",             url: "", status: "soon" }
     ]
   };
   /* ═══════════════════════════════════════════ */
@@ -426,13 +448,13 @@
   });
 
   async function loadStatus() {
-    const pill = $("status-pill"), board = $("board");
+    const pill = $("status-pill");
     try {
       const res = await fetch("https://api.mcsrvstat.us/3/" + encodeURIComponent(CONFIG.address), { cache: "no-store" });
       const d = await res.json();
       if (d.online) {
         pill.className = "pill is-online";
-        board.className = "board is-online";
+        $("status-tile").className = "tile tile-status is-online";
         $("status-text").textContent = d.players.online > 0 ? `${d.players.online} playing right now` : "Server is online";
         $("stat-status").textContent = "Online";
         $("stat-players").textContent = `${d.players.online}/${d.players.max}`;
@@ -442,7 +464,7 @@
         $("playing").textContent = names.length ? "On now: " + names.join(", ") : "Nobody's on yet. Be the first.";
       } else {
         pill.className = "pill is-offline";
-        board.className = "board is-offline";
+        $("status-tile").className = "tile tile-status is-offline";
         $("status-text").textContent = "Server is offline";
         $("stat-status").textContent = "Offline";
         $("stat-players").textContent = "0";
